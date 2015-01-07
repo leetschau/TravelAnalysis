@@ -1,21 +1,26 @@
 nodeDict = {}
-with open('nodedict.csv', 'r') as src:
+with open('node_city_dict.csv', 'r') as src:
     for content in src:
         line = content.strip()
-        city = line.split(" ")[0]
-        node = line.split(" ")[1]
-        travel_type = line.split(" ")[2]
-        nodeDict[node] = city + " " + travel_type
+        node = line.split(" ")[0]
+        city = line.split(" ")[1]
+        nodeDict[node] = city
 
 lastNode = ""
-with open('gdNode.csv', 'r') as src:
+with open('cellDict.csv', 'r') as src:
     with open('gdLocMap.csv', 'w') as dst:
         for content in src:
             line = content.strip()
-            if line != '""':
-                lastNode = line
-            city_travelType = nodeDict[lastNode]
-            city = city_travelType.split(" ")[0]
-            travel_type = city_travelType.split(" ")[1]
-            target = city + " " + city + " " + lastNode + " " + lastNode +  " " + travel_type + "\n"
-            dst.write(target)
+            eles = line.split(",")
+            if len(eles[1]) > 0:
+                lastNode = eles[1]
+            cgi = eles[0]
+            city = nodeDict[lastNode]
+            cityID = city
+            node = lastNode
+            nodeID = node
+            longitude = eles[2]
+            latitude = eles[3]
+            target = cgi + "," + city + " " + cityID + " " + node  + \
+                    " " + nodeID + " " + longitude + " " + latitude
+            dst.write(target + "\n")
