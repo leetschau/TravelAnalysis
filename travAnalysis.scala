@@ -75,7 +75,7 @@ val all_users = split_win.groupBy(_(0))
 val travel_users = all_users.filter(x => x._2.size > 1)
 
 // 输入起点和终点的经纬度，返回两点间距离
-def calc_distance(start_lat: String, start_lng: String, end_lat: String, end_lng: String): Double = {
+def calc_distance(start_lat: String, start_lng: String, end_lat: String, end_lng: String): Long = {
   val AVERAGE_RADIUS_OF_EARTH = 6371
 
   val userLat = start_lat.toDouble
@@ -92,7 +92,7 @@ def calc_distance(start_lat: String, start_lng: String, end_lat: String, end_lng
 
   val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
-  return AVERAGE_RADIUS_OF_EARTH * c
+  return Math.round(AVERAGE_RADIUS_OF_EARTH * c)
 }
 
 // 输入起点和终点时间，返回二者时间差，单位：小时
@@ -112,7 +112,7 @@ def calc_travel_speed(travellist: List[List[String]]):  List[List[String]] = {
                   (travel_sorted(x)(TIME_POS) != travel_sorted(x+1)(TIME_POS))) {
       val start = travel_sorted(x)
       val end = travel_sorted(x+1)
-      val distance = calc_distance(start(LONGITUDE_POS), start(LATITUDE_POS), end(LONGITUDE_POS), end(LATITUDE_POS))
+      val distance = calc_distance(start(LATITUDE_POS), start(LONGITUDE_POS), end(LATITUDE_POS), end(LONGITUDE_POS))
       val duration = calc_duration(start(TIME_POS), end(TIME_POS))
       node_pairs = node_pairs :+ List(start(USER_ID_POS), start(TIME_POS), start(CITY_ID_POS), start(CITY_NAME_POS),
           start(NODE_ID_POS), start(NODE_NAME_POS), end(TIME_POS), end(CITY_ID_POS), end(CITY_NAME_POS),
@@ -127,4 +127,4 @@ def calc_travel_speed(travellist: List[List[String]]):  List[List[String]] = {
 // 元素示例：List(460012720617764, 2014-12-22  09:15:00, 珠海, 珠海, 珠海火车站, 珠海火车站, 2014-12-22  09:30:00, 珠海, 珠海, 珠海北站, 珠海北站, 32.052239154078805)
 val travel_map = travel_users.map(x => x._2.toList).flatMap(x => calc_travel_speed(x))
 
-travel_map.saveAsTextFile(TRAVEL_MAP_FILE)
+travel_map.map(x => x.reduce(_ + "," + _)).saveAsTextFile(TRAVEL_MAP_FILE)
